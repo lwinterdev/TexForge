@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="TexForge/TexForge.vcxproj" Id="452dd300-8910-495e-beba-d3aba6b9914b" />
+</Solution>
