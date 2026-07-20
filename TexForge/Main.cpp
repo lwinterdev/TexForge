@@ -3,13 +3,16 @@
 #include<GLFW/glfw3.h>
 #include<stb/stb_image.h>
 #include <filesystem>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include"shaderClass.h"
 #include"VAO.h"
 #include"VBO.h"
 #include"EBO.h"
 #include"Texture.h"
-
+#include"Camera.h"
 
 
 // Vertices coordinates
@@ -29,7 +32,7 @@ GLuint indices[] =
 	0, 3, 2 // Lower triangle
 };
 
-
+bool perspective = true;
 
 int main()
 {
@@ -96,6 +99,12 @@ int main()
 	Texture testImage("test_image.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
 	testImage.texUnit(shaderProgram, "tex0", 0);
 	
+	float rotation = 0.0f;
+	double prevTime = glfwGetTime();
+
+	//glEnable(GL_DEPTH_TEST);
+
+	Camera camera(800, 800, glm::vec3(0.0f, 0.0f, 2.0f));
 
 	GLuint tex0Uni = glGetUniformLocation(shaderProgram.ID, "tex0");
 	shaderProgram.Activate();
@@ -111,11 +120,47 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 		// Tell OpenGL which Shader Program we want to use
 		shaderProgram.Activate();
+
+		camera.Inputs(window);
+
+		camera.Matrix(
+			45.0f,
+			0.1f,
+			100.0f,
+			shaderProgram,
+			"camMatrix"
+		);
+
+
+		double crntTime = glfwGetTime();
+		if (crntTime - prevTime >= 0.016) {
+			rotation += 1.0f;
+			prevTime = crntTime;
+		}
+
+	   /* glm::mat4 model = glm::mat4(1.0f);
+		glm::mat4 view = glm::mat4(1.0f);
+		glm::mat4 proj = glm::mat4(1.0f);
+		
+		model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -2.0f));
+		proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+
+		int modelLoc = glad_glGetUniformLocation(shaderProgram.ID, "model");
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		int viewLoc = glad_glGetUniformLocation(shaderProgram.ID, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		int projLoc = glad_glGetUniformLocation(shaderProgram.ID, "proj");
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));*/
+
+
+
 		glUniform1f(uniID, 0.5f);
 		// Bind the VAO so OpenGL knows to use it
 		VAO1.Bind();
+		testImage.Bind();      // <-- bind texture
 		// Draw primitives, number of indices, datatype of indices, index of indices
-		glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(int), GL_UNSIGNED_INT, 0);
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
 		// Take care of all GLFW events
