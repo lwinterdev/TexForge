@@ -1,12 +1,37 @@
 #include<iostream>
+
+// Dear ImGui core
+#include <imgui.h>
+
+// ImGui integrations:
+// GLFW handles window/input
+// OpenGL3 handles rendering the UI
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+
+
+// OpenGL function loader
 #include<glad/glad.h>
+
+// Window and input library
 #include<GLFW/glfw3.h>
+
+
+// Image loading library
 #include<stb/stb_image.h>
+
+
 #include <filesystem>
+
+
+// GLM mathematics library
+// Used for vectors, matrices and 3D transformations
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+
+// TexForge engine classes
 #include"shaderClass.h"
 #include"VAO.h"
 #include"VBO.h"
@@ -15,114 +40,357 @@
 #include"Camera.h"
 
 
-// Vertices coordinates
+
+// Vertex data
+//
+// Each vertex contains:
+//
+// Position:  x,y,z
+// Color:     r,g,b
+// Texture:   u,v
+//
+// Layout:
+// [position][color][uv]
+//
 GLfloat vertices[] =
-{ //     COORDINATES     /        COLORS      /   TexCoord  //
-	-0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f, // Lower left corner
-	-0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f, // Upper left corner
-	 0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,	1.0f, 1.0f, // Upper right corner
-	 0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f  // Lower right corner
+{
+	-0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f,
+	-0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f,
+	 0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,	1.0f, 1.0f,
+	 0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f
 };
 
 
-// Indices for vertices order
+
+// Instead of storing duplicate vertices,
+// an EBO stores the order in which vertices are used.
+//
+// This draws two triangles:
+//
+// Triangle 1: 0 -> 2 -> 1
+// Triangle 2: 0 -> 3 -> 2
+//
 GLuint indices[] =
 {
-	0, 2, 1, // Upper triangle
-	0, 3, 2 // Lower triangle
+	0,2,1,
+	0,3,2
 };
 
-bool perspective = true;
+
 
 int main()
 {
+
+	// ----------------------------------------
 	// Initialize GLFW
+	// ----------------------------------------
+
 	glfwInit();
 
-	// Tell GLFW what version of OpenGL we are using 
-	// In this case we are using OpenGL 3.3
+
+
+	// Request OpenGL 3.3 Core profile.
+	//
+	// Core profile removes old fixed pipeline features
+	// and forces modern OpenGL usage.
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	// Tell GLFW we are using the CORE profile
-	// So that means we only have the modern functions
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_PROFILE,
+		GLFW_OPENGL_CORE_PROFILE);
 
-	// Create a GLFWwindow object of 800 by 800 pixels, naming it "TexForge"
-	GLFWwindow* window = glfwCreateWindow(800, 800, "TexForge", NULL, NULL);
-	// Error check if the window fails to create
+
+
+	// Create the application window.
+	GLFWwindow* window = glfwCreateWindow(
+		800,
+		800,
+		"TexForge",
+		NULL,
+		NULL
+	);
+
+
+
 	if (window == NULL)
 	{
-		std::cout << "Failed to create GLFW window" << std::endl;
+		std::cout << "Failed to create GLFW window\n";
 		glfwTerminate();
 		return -1;
 	}
-	// Introduce the window into the current context
+
+
+
+	// Makes this window the active OpenGL context.
 	glfwMakeContextCurrent(window);
 
-	//Load GLAD so it configures OpenGL
-	gladLoadGL();
-	// Specify the viewport of OpenGL in the Window
-	// In this case the viewport goes from x = 0, y = 0, to x = 800, y = 800
-	glViewport(0, 0, 800, 800);
+
+
+	// Load OpenGL functions.
+	//
+	// OpenGL functions are not directly available from the OS.
+	// GLAD loads the correct function pointers.
+	if (!gladLoadGL())
+	{
+		std::cout << "Failed to initialize GLAD\n";
+		return -1;
+	}
 
 
 
-	// Generates Shader object using shaders defualt.vert and default.frag
-	Shader shaderProgram("vertex.vert", "fragment.frag");
+	// Define the area OpenGL renders into.
+	glViewport(
+		0,
+		0,
+		800,
+		800
+	);
 
 
 
-	// Generates Vertex Array Object and binds it
+	// Enable depth buffering.
+	//
+	// Required for proper 3D rendering:
+	// closer objects hide objects behind them.
+	glEnable(GL_DEPTH_TEST);
+
+
+
+
+
+	// ----------------------------------------
+	// Initialize ImGui
+	// ----------------------------------------
+
+
+	IMGUI_CHECKVERSION();
+
+
+	// Creates ImGui internal state.
+	ImGui::CreateContext();
+
+
+
+	// Access ImGui settings.
+	ImGuiIO& io = ImGui::GetIO();
+
+
+
+	// Default dark editor theme.
+	ImGui::StyleColorsDark();
+
+
+
+	// Connect ImGui to GLFW.
+	// Handles keyboard, mouse and window input.
+	ImGui_ImplGlfw_InitForOpenGL(
+		window,
+		true
+	);
+
+
+
+	// Connect ImGui to OpenGL.
+	// This creates the GPU resources needed
+	// to draw the interface.
+	ImGui_ImplOpenGL3_Init(
+		"#version 330"
+	);
+
+
+
+
+
+	// ----------------------------------------
+	// Create rendering objects
+	// ----------------------------------------
+
+
+	// Load vertex and fragment shaders.
+	//
+	// Vertex shader:
+	// transforms 3D coordinates
+	//
+	// Fragment shader:
+	// decides pixel colors
+	//
+	Shader shaderProgram(
+		"vertex.vert",
+		"fragment.frag"
+	);
+
+
+
+	// VAO remembers the layout of vertex data.
+	//
+	// It stores information like:
+	//
+	// location 0 -> position
+	// location 1 -> color
+	// location 2 -> texture coordinates
+	//
 	VAO VAO1;
 	VAO1.Bind();
 
-	// Generates Vertex Buffer Object and links it to vertices
-	VBO VBO1(vertices, sizeof(vertices));
-	// Generates Element Buffer Object and links it to indices
-	EBO EBO1(indices, sizeof(indices));
 
-	// Links VBO to VAO
-	VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
-	VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	VAO1.LinkAttrib(VBO1, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	// Unbind all to prevent accidentally modifying them
+
+	// Upload vertex data to GPU.
+	VBO VBO1(
+		vertices,
+		sizeof(vertices)
+	);
+
+
+
+	// Upload index data to GPU.
+	EBO EBO1(
+		indices,
+		sizeof(indices)
+	);
+
+
+
+
+	// Tell OpenGL how the vertex data is structured.
+
+	// Position attribute
+	VAO1.LinkAttrib(
+		VBO1,
+		0,
+		3,
+		GL_FLOAT,
+		8 * sizeof(float),
+		(void*)0
+	);
+
+
+	// Color attribute
+	VAO1.LinkAttrib(
+		VBO1,
+		1,
+		3,
+		GL_FLOAT,
+		8 * sizeof(float),
+		(void*)(3 * sizeof(float))
+	);
+
+
+
+	// Texture coordinate attribute
+	VAO1.LinkAttrib(
+		VBO1,
+		2,
+		2,
+		GL_FLOAT,
+		8 * sizeof(float),
+		(void*)(6 * sizeof(float))
+	);
+
+
+
+	// Prevent accidental modification.
 	VAO1.Unbind();
 	VBO1.Unbind();
 	EBO1.Unbind();
 
-	GLuint uniID = glGetUniformLocation(shaderProgram.ID, "scale");
-
-	std::cout << std::filesystem::current_path() << std::endl;
-
-	
-	// Texture
-	Texture testImage("test_image.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
-	testImage.texUnit(shaderProgram, "tex0", 0);
-	
-	float rotation = 0.0f;
-	double prevTime = glfwGetTime();
-
-	//glEnable(GL_DEPTH_TEST);
-
-	Camera camera(800, 800, glm::vec3(0.0f, 0.0f, 2.0f));
-
-	GLuint tex0Uni = glGetUniformLocation(shaderProgram.ID, "tex0");
-	shaderProgram.Activate();
-	glUniform1i(tex0Uni, 0);
 
 
-	// Main while loop
+
+	// Shader uniform used for testing scaling.
+	GLuint uniID =
+		glGetUniformLocation(
+			shaderProgram.ID,
+			"scale"
+		);
+
+
+
+
+	// Load texture into GPU memory.
+	Texture testImage(
+		"test_image.png",
+		GL_TEXTURE_2D,
+		GL_TEXTURE0,
+		GL_RGBA,
+		GL_UNSIGNED_BYTE
+	);
+
+
+
+	testImage.texUnit(
+		shaderProgram,
+		"tex0",
+		0
+	);
+
+
+
+
+	// Camera controls the view matrix.
+	//
+	// Position:
+	// x = 0
+	// y = 0
+	// z = 2
+	//
+	Camera camera(
+		800,
+		800,
+		glm::vec3(0, 0, 2)
+	);
+
+
+
+	float brushSize = 25.0f;
+
+
+
+
+
+	// ----------------------------------------
+	// Main application loop
+	// ----------------------------------------
+
 	while (!glfwWindowShouldClose(window))
 	{
-		// Specify the color of the background
-		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-		// Clean the back buffer and assign the new color to it
-		glClear(GL_COLOR_BUFFER_BIT);
-		// Tell OpenGL which Shader Program we want to use
+
+		// Process keyboard/mouse/window events.
+		glfwPollEvents();
+
+
+
+
+		// Clear previous frame.
+		glClearColor(
+			0.07f,
+			0.13f,
+			0.17f,
+			1.0f
+		);
+
+
+		glClear(
+			GL_COLOR_BUFFER_BIT |
+			GL_DEPTH_BUFFER_BIT
+		);
+
+
+
+
+
+		// ----------------------------------------
+		// Render 3D scene
+		// ----------------------------------------
+
+
 		shaderProgram.Activate();
 
+
+		// Update camera movement.
 		camera.Inputs(window);
 
+
+
+		// Send camera matrices to GPU.
 		camera.Matrix(
 			45.0f,
 			0.1f,
@@ -132,52 +400,126 @@ int main()
 		);
 
 
-		double crntTime = glfwGetTime();
-		if (crntTime - prevTime >= 0.016) {
-			rotation += 1.0f;
-			prevTime = crntTime;
+
+		glUniform1f(
+			uniID,
+			0.5f
+		);
+
+
+
+		VAO1.Bind();
+
+		testImage.Bind();
+
+
+
+		// Draw indexed triangles.
+		glDrawElements(
+			GL_TRIANGLES,
+			sizeof(indices) / sizeof(GLuint),
+			GL_UNSIGNED_INT,
+			0
+		);
+
+
+
+
+
+		// ----------------------------------------
+		// Build ImGui interface
+		// ----------------------------------------
+
+		// Start a new UI frame.
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+
+
+
+		ImGui::Begin(
+			"TexForge"
+		);
+
+
+
+		ImGui::Text(
+			"FPS: %.1f",
+			io.Framerate
+		);
+
+
+
+		ImGui::SliderFloat(
+			"Brush Size",
+			&brushSize,
+			1.0f,
+			100.0f
+		);
+
+
+
+		if (ImGui::Button("Save Project"))
+		{
+			std::cout << "Saving...\n";
 		}
 
-	   /* glm::mat4 model = glm::mat4(1.0f);
-		glm::mat4 view = glm::mat4(1.0f);
-		glm::mat4 proj = glm::mat4(1.0f);
-		
-		model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -2.0f));
-		proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
-		int modelLoc = glad_glGetUniformLocation(shaderProgram.ID, "model");
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		int viewLoc = glad_glGetUniformLocation(shaderProgram.ID, "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		int projLoc = glad_glGetUniformLocation(shaderProgram.ID, "proj");
-		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj));*/
+
+		ImGui::End();
 
 
 
-		glUniform1f(uniID, 0.5f);
-		// Bind the VAO so OpenGL knows to use it
-		VAO1.Bind();
-		testImage.Bind();      // <-- bind texture
-		// Draw primitives, number of indices, datatype of indices, index of indices
-		glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(int), GL_UNSIGNED_INT, 0);
-		// Swap the back buffer with the front buffer
+
+
+		// Convert ImGui commands into OpenGL draw calls.
+		ImGui::Render();
+
+
+		ImGui_ImplOpenGL3_RenderDrawData(
+			ImGui::GetDrawData()
+		);
+
+
+
+
+
+		// Swap back buffer to screen.
 		glfwSwapBuffers(window);
-		// Take care of all GLFW events
-		glfwPollEvents();
+
 	}
 
 
 
-	// Delete all the objects we've created
+
+
+	// ----------------------------------------
+	// Shutdown
+	// ----------------------------------------
+
+
+	ImGui_ImplOpenGL3_Shutdown();
+
+	ImGui_ImplGlfw_Shutdown();
+
+	ImGui::DestroyContext();
+
+
+
 	VAO1.Delete();
 	VBO1.Delete();
 	EBO1.Delete();
+
 	shaderProgram.Delete();
 
-	// Delete window before ending the program
+
+
 	glfwDestroyWindow(window);
-	// Terminate GLFW before ending the program
+
 	glfwTerminate();
+
+
+
 	return 0;
 }

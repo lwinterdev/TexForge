@@ -71,11 +71,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\winte\source\repos\TexForge\libraries\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\winte\source\repos\TexForge\libraries\include\imgui\backends;C:\Users\winte\source\repos\TexForge\libraries\include\imgui;C:\Users\winte\source\repos\TexForge\libraries\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\winte\source\repos\TexForge\libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\winte\source\repos\TexForge\libraries\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\winte\source\repos\TexForge\libraries\include\imgui\backends;C:\Users\winte\source\repos\TexForge\libraries\include\imgui;C:\Users\winte\source\repos\TexForge\libraries\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\winte\source\repos\TexForge\libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -85,6 +85,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -114,6 +115,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -138,6 +140,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\glad.c" />
+    <ClCompile Include="..\libraries\include\imgui\imgui.cpp" />
+    <ClCompile Include="..\libraries\include\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\libraries\include\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\libraries\include\imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\libraries\include\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="backends\imgui_impl_glfw.cpp" />
+    <ClCompile Include="backends\imgui_impl_opengl3.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="EBO.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -152,6 +161,12 @@
     <None Include="vertex.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\libraries\include\imgui\imconfig.h" />
+    <ClInclude Include="..\libraries\include\imgui\imgui.h" />
+    <ClInclude Include="..\libraries\include\imgui\imgui_internal.h" />
+    <ClInclude Include="..\libraries\include\imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\libraries\include\imgui\imstb_textedit.h" />
+    <ClInclude Include="..\libraries\include\imgui\imstb_truetype.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="EBO.h" />
     <ClInclude Include="shaderClass.h" />
