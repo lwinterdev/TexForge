@@ -63,6 +63,15 @@
     <ClCompile Include="backends\imgui_impl_opengl3.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="assets\Mesh.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="assets\Model.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="assets\ModelImporter.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertex.vert" />
@@ -103,6 +112,18 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="..\libraries\include\imgui\imstb_truetype.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="assets\Vertex.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="assets\Mesh.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="assets\Model.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="assets\ModelImporter.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

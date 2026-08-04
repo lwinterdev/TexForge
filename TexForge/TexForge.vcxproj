@@ -85,7 +85,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../include;backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -115,7 +115,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../include;backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -145,6 +145,9 @@
     <ClCompile Include="..\libraries\include\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\libraries\include\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\libraries\include\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="assets\Mesh.cpp" />
+    <ClCompile Include="assets\Model.cpp" />
+    <ClCompile Include="assets\ModelImporter.cpp" />
     <ClCompile Include="backends\imgui_impl_glfw.cpp" />
     <ClCompile Include="backends\imgui_impl_opengl3.cpp" />
     <ClCompile Include="Camera.cpp" />
@@ -167,6 +170,10 @@
     <ClInclude Include="..\libraries\include\imgui\imstb_rectpack.h" />
     <ClInclude Include="..\libraries\include\imgui\imstb_textedit.h" />
     <ClInclude Include="..\libraries\include\imgui\imstb_truetype.h" />
+    <ClInclude Include="assets\Mesh.h" />
+    <ClInclude Include="assets\Model.h" />
+    <ClInclude Include="assets\ModelImporter.h" />
+    <ClInclude Include="assets\Vertex.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="EBO.h" />
     <ClInclude Include="shaderClass.h" />

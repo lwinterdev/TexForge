@@ -30,52 +30,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-
 // TexForge engine classes
 #include"shaderClass.h"
-#include"VAO.h"
-#include"VBO.h"
-#include"EBO.h"
 #include"Texture.h"
 #include"Camera.h"
-
-
-
-// Vertex data
-//
-// Each vertex contains:
-//
-// Position:  x,y,z
-// Color:     r,g,b
-// Texture:   u,v
-//
-// Layout:
-// [position][color][uv]
-//
-GLfloat vertices[] =
-{
-	-0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,	0.0f, 0.0f,
-	-0.5f,  0.5f, 0.0f,     0.0f, 1.0f, 0.0f,	0.0f, 1.0f,
-	 0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f,	1.0f, 1.0f,
-	 0.5f, -0.5f, 0.0f,     1.0f, 1.0f, 1.0f,	1.0f, 0.0f
-};
-
-
-
-// Instead of storing duplicate vertices,
-// an EBO stores the order in which vertices are used.
-//
-// This draws two triangles:
-//
-// Triangle 1: 0 -> 2 -> 1
-// Triangle 2: 0 -> 3 -> 2
-//
-GLuint indices[] =
-{
-	0,2,1,
-	0,3,2
-};
-
+#include "assets/Model.h"
+#include "assets/ModelImporter.h"
 
 
 int main()
@@ -218,82 +178,10 @@ int main()
 		"fragment.frag"
 	);
 
+	ModelImporter importer;
 
-
-	// VAO remembers the layout of vertex data.
-	//
-	// It stores information like:
-	//
-	// location 0 -> position
-	// location 1 -> color
-	// location 2 -> texture coordinates
-	//
-	VAO VAO1;
-	VAO1.Bind();
-
-
-
-	// Upload vertex data to GPU.
-	VBO VBO1(
-		vertices,
-		sizeof(vertices)
-	);
-
-
-
-	// Upload index data to GPU.
-	EBO EBO1(
-		indices,
-		sizeof(indices)
-	);
-
-
-
-
-	// Tell OpenGL how the vertex data is structured.
-
-	// Position attribute
-	VAO1.LinkAttrib(
-		VBO1,
-		0,
-		3,
-		GL_FLOAT,
-		8 * sizeof(float),
-		(void*)0
-	);
-
-
-	// Color attribute
-	VAO1.LinkAttrib(
-		VBO1,
-		1,
-		3,
-		GL_FLOAT,
-		8 * sizeof(float),
-		(void*)(3 * sizeof(float))
-	);
-
-
-
-	// Texture coordinate attribute
-	VAO1.LinkAttrib(
-		VBO1,
-		2,
-		2,
-		GL_FLOAT,
-		8 * sizeof(float),
-		(void*)(6 * sizeof(float))
-	);
-
-
-
-	// Prevent accidental modification.
-	VAO1.Unbind();
-	VBO1.Unbind();
-	EBO1.Unbind();
-
-
-
+	Model model =
+		importer.Load("Assets/sword.fbx");
 
 	// Shader uniform used for testing scaling.
 	GLuint uniID =
@@ -301,8 +189,6 @@ int main()
 			shaderProgram.ID,
 			"scale"
 		);
-
-
 
 
 	// Load texture into GPU memory.
@@ -315,15 +201,11 @@ int main()
 	);
 
 
-
 	testImage.texUnit(
 		shaderProgram,
 		"tex0",
 		0
 	);
-
-
-
 
 	// Camera controls the view matrix.
 	//
@@ -338,13 +220,7 @@ int main()
 		glm::vec3(0, 0, 2)
 	);
 
-
-
 	float brushSize = 25.0f;
-
-
-
-
 
 	// ----------------------------------------
 	// Main application loop
@@ -355,9 +231,6 @@ int main()
 
 		// Process keyboard/mouse/window events.
 		glfwPollEvents();
-
-
-
 
 		// Clear previous frame.
 		glClearColor(
@@ -373,10 +246,6 @@ int main()
 			GL_DEPTH_BUFFER_BIT
 		);
 
-
-
-
-
 		// ----------------------------------------
 		// Render 3D scene
 		// ----------------------------------------
@@ -384,11 +253,8 @@ int main()
 
 		shaderProgram.Activate();
 
-
 		// Update camera movement.
 		camera.Inputs(window);
-
-
 
 		// Send camera matrices to GPU.
 		camera.Matrix(
@@ -400,30 +266,14 @@ int main()
 		);
 
 
-
 		glUniform1f(
 			uniID,
 			0.5f
 		);
 
+		//testImage.Bind();
 
-
-		VAO1.Bind();
-
-		testImage.Bind();
-
-
-
-		// Draw indexed triangles.
-		glDrawElements(
-			GL_TRIANGLES,
-			sizeof(indices) / sizeof(GLuint),
-			GL_UNSIGNED_INT,
-			0
-		);
-
-
-
+		model.Draw(shaderProgram);
 
 
 		// ----------------------------------------
@@ -469,10 +319,6 @@ int main()
 
 		ImGui::End();
 
-
-
-
-
 		// Convert ImGui commands into OpenGL draw calls.
 		ImGui::Render();
 
@@ -480,36 +326,21 @@ int main()
 		ImGui_ImplOpenGL3_RenderDrawData(
 			ImGui::GetDrawData()
 		);
-
-
-
-
-
 		// Swap back buffer to screen.
 		glfwSwapBuffers(window);
 
 	}
 
 
-
-
-
 	// ----------------------------------------
 	// Shutdown
 	// ----------------------------------------
-
-
 	ImGui_ImplOpenGL3_Shutdown();
 
 	ImGui_ImplGlfw_Shutdown();
 
 	ImGui::DestroyContext();
 
-
-
-	VAO1.Delete();
-	VBO1.Delete();
-	EBO1.Delete();
 
 	shaderProgram.Delete();
 
