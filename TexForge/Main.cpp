@@ -36,6 +36,21 @@
 #include"Camera.h"
 #include "assets/Model.h"
 #include "assets/ModelImporter.h"
+#include "painting/PaintTexture.h"
+#include "painting/Brush.h"
+#include "engine/RayPicker.h"
+
+void Paint(Brush brush, PaintTexture& paintTexture)
+{
+	brush.Paint(
+		paintTexture,
+		1024,
+		1024
+	);
+
+	paintTexture.Upload();
+}
+
 
 
 int main()
@@ -180,8 +195,9 @@ int main()
 
 	ModelImporter importer;
 
+
 	Model model =
-		importer.Load("Assets/sword.fbx");
+		importer.Load("./testcube.obj");
 
 	// Shader uniform used for testing scaling.
 	GLuint uniID =
@@ -220,19 +236,32 @@ int main()
 		glm::vec3(0, 0, 2)
 	);
 
-	float brushSize = 25.0f;
 
-	// ----------------------------------------
-	// Main application loop
-	// ----------------------------------------
+	PaintTexture paintTexture(
+		2048,
+		2048,
+		testImage.ID
+	);
+
+	Brush brush;
+
+	brush.color =
+		glm::vec4(
+			1.0f,
+			0.0f,
+			0.0f,
+			1.0f
+		);
+
+
+
+
 
 	while (!glfwWindowShouldClose(window))
 	{
-
-		// Process keyboard/mouse/window events.
 		glfwPollEvents();
 
-		// Clear previous frame.
+
 		glClearColor(
 			0.07f,
 			0.13f,
@@ -240,58 +269,122 @@ int main()
 			1.0f
 		);
 
-
 		glClear(
 			GL_COLOR_BUFFER_BIT |
 			GL_DEPTH_BUFFER_BIT
 		);
 
-		// ----------------------------------------
-		// Render 3D scene
-		// ----------------------------------------
 
+		//----------------------------
+		// Camera
+		//----------------------------
 
-		shaderProgram.Activate();
-
-		// Update camera movement.
 		camera.Inputs(window);
 
-		// Send camera matrices to GPU.
 		camera.Matrix(
-			45.0f,
-			0.1f,
-			100.0f,
 			shaderProgram,
 			"camMatrix"
 		);
 
 
-		glUniform1f(
-			uniID,
-			0.5f
-		);
+		//----------------------------
+		// Render model
+		//----------------------------
 
-		//testImage.Bind();
+		shaderProgram.Activate();
 
 		model.Draw(shaderProgram);
 
 
-		// ----------------------------------------
-		// Build ImGui interface
-		// ----------------------------------------
 
-		// Start a new UI frame.
+		//----------------------------
+		// Mouse position
+		//----------------------------
+
+		double mouseX;
+		double mouseY;
+
+		glfwGetCursorPos(
+			window,
+			&mouseX,
+			&mouseY
+		);
+
+
+
+		//----------------------------
+		// Picking / painting
+		//----------------------------
+
+		if (glfwGetMouseButton(
+			window,
+			GLFW_MOUSE_BUTTON_RIGHT
+		) == GLFW_PRESS)
+		{
+
+			Ray ray =
+				RayPicker::ScreenPointToRay(
+					mouseX,
+					mouseY,
+					800,
+					800,
+					camera
+				);
+
+
+			RaycastHit hit =
+				RayPicker::Raycast(
+					ray,
+					model
+				);
+
+
+			if (hit.hit)
+			{
+				std::cout
+					<< "Position: "
+					<< hit.position.x << ", "
+					<< hit.position.y << ", "
+					<< hit.position.z
+					<< "\n";
+
+				std::cout
+					<< "UV: "
+					<< hit.uv.x
+					<< ", "
+					<< hit.uv.y
+					<< "\n\n";
+
+				int x =
+					hit.uv.x *
+					paintTexture.width;
+
+
+				int y =
+					(1.0f - hit.uv.y) *
+					paintTexture.height;
+
+
+				brush.Paint(
+					paintTexture,
+					x,
+					y
+				);
+			}
+		}
+
+
+
+		//----------------------------
+		// ImGui
+		//----------------------------
+
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
 
-
-
-		ImGui::Begin(
-			"TexForge"
-		);
-
+		ImGui::Begin("TexForge");
 
 
 		ImGui::Text(
@@ -300,14 +393,12 @@ int main()
 		);
 
 
-
 		ImGui::SliderFloat(
 			"Brush Size",
-			&brushSize,
+			&brush.radius,
 			1.0f,
 			100.0f
 		);
-
 
 
 		if (ImGui::Button("Save Project"))
@@ -316,19 +407,34 @@ int main()
 		}
 
 
-
 		ImGui::End();
 
-		// Convert ImGui commands into OpenGL draw calls.
-		ImGui::Render();
 
+
+		//----------------------------
+		// Brush cursor
+		//----------------------------
+
+		ImDrawList* drawList =
+			ImGui::GetForegroundDrawList();
+
+
+		drawList->AddCircle(
+			ImVec2(mouseX, mouseY),
+			brush.radius,
+			IM_COL32(255, 255, 255, 255)
+		);
+
+
+
+		ImGui::Render();
 
 		ImGui_ImplOpenGL3_RenderDrawData(
 			ImGui::GetDrawData()
 		);
-		// Swap back buffer to screen.
-		glfwSwapBuffers(window);
 
+
+		glfwSwapBuffers(window);
 	}
 
 

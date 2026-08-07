@@ -22,6 +22,17 @@ public:
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
 
+    const std::vector<Vertex>& GetVertices() const
+    {
+        return vertices;
+    }
+
+
+    const std::vector<unsigned int>& GetIndices() const
+    {
+        return indices;
+    }
+
     // GPU data
     VAO vao;
     VBO vbo;

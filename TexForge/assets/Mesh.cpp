@@ -68,9 +68,19 @@ void Mesh::SetupMesh()
 
 void Mesh::Draw(Shader& shader)
 {
+    unsigned int unit = 0;
+
     for (Texture& texture : textures)
     {
+        texture.texUnit(
+            shader,
+            "tex0",
+            unit
+        );
+
         texture.Bind();
+
+        unit++;
     }
 
     vao.Bind();
