@@ -72,6 +72,9 @@
     <ClCompile Include="assets\ModelImporter.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="painting\PaintTexture.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertex.vert" />
@@ -124,6 +127,9 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="assets\ModelImporter.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="painting\PaintTexture.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

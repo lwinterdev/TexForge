@@ -152,7 +152,10 @@
     <ClCompile Include="backends\imgui_impl_opengl3.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="EBO.cpp" />
+    <ClCompile Include="engine\Raypicker.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="painting\Brush.cpp" />
+    <ClCompile Include="painting\PaintTexture.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="shaderClass.cpp" />
     <ClCompile Include="stb.cpp" />
@@ -176,6 +179,9 @@
     <ClInclude Include="assets\Vertex.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="EBO.h" />
+    <ClInclude Include="engine\RayPicker.h" />
+    <ClInclude Include="painting\Brush.h" />
+    <ClInclude Include="painting\PaintTexture.h" />
     <ClInclude Include="shaderClass.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="VAO.h" />

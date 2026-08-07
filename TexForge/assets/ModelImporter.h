@@ -14,6 +14,8 @@ public:
 
     Model Load(const std::string& path);
 
+    std::string lastError;
+
 private:
 
     void ProcessNode(
@@ -25,5 +27,11 @@ private:
     Mesh ProcessMesh(
         aiMesh* mesh,
         const aiScene* scene
+    );
+
+    std::vector<Texture> LoadMaterialTextures(
+        aiMaterial* mat,
+        aiTextureType type,
+        std::string typeName
     );
 };
