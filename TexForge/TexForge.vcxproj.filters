@@ -75,6 +75,15 @@
     <ClCompile Include="painting\PaintTexture.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="engine\Raypicker.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="painting\Brush.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="painting\FaceSelection.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertex.vert" />
@@ -130,6 +139,15 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="painting\PaintTexture.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\RayPicker.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="painting\Brush.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="painting\FaceSelection.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
