@@ -156,6 +156,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="painting\Brush.cpp" />
     <ClCompile Include="painting\FaceSelection.cpp" />
+    <ClCompile Include="painting\PaintLayer.cpp" />
     <ClCompile Include="painting\PaintTexture.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="shaderClass.cpp" />
@@ -184,6 +185,7 @@
     <ClInclude Include="imfilebrowser.h" />
     <ClInclude Include="painting\Brush.h" />
     <ClInclude Include="painting\FaceSelection.h" />
+    <ClInclude Include="painting\PaintLayer.h" />
     <ClInclude Include="painting\PaintTexture.h" />
     <ClInclude Include="shaderClass.h" />
     <ClInclude Include="Texture.h" />

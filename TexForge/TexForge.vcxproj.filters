@@ -84,6 +84,9 @@
     <ClCompile Include="painting\FaceSelection.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="painting\PaintLayer.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertex.vert" />
@@ -151,6 +154,9 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="imfilebrowser.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="painting\PaintLayer.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
