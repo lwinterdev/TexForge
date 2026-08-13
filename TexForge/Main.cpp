@@ -1,462 +1,626 @@
-#include<iostream>
+#include <iostream>
 
 // Dear ImGui core
 #include <imgui.h>
 
-// ImGui integrations:
-// GLFW handles window/input
-// OpenGL3 handles rendering the UI
+// File browser
+#include "imfilebrowser.h"
+
+// ImGui integrations
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-
 // OpenGL function loader
-#include<glad/glad.h>
+#include <glad/glad.h>
 
 // Window and input library
-#include<GLFW/glfw3.h>
-
+#include <GLFW/glfw3.h>
 
 // Image loading library
-#include<stb/stb_image.h>
+#include <stb/stb_image.h>
 
-
-#include <filesystem>
-
-
-// GLM mathematics library
-// Used for vectors, matrices and 3D transformations
+// GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// TexForge engine classes
-#include"shaderClass.h"
-#include"Texture.h"
-#include"Camera.h"
+// TexForge
+#include "shaderClass.h"
+#include "Texture.h"
+#include "Camera.h"
 #include "assets/Model.h"
 #include "assets/ModelImporter.h"
 #include "painting/PaintTexture.h"
 #include "painting/Brush.h"
 #include "engine/RayPicker.h"
 
-void Paint(Brush brush, PaintTexture& paintTexture)
-{
-	brush.Paint(
-		paintTexture,
-		1024,
-		1024
-	);
-
-	paintTexture.Upload();
-}
-
-
 
 int main()
 {
+    // ========================================
+    // Initialize GLFW
+    // ========================================
 
-	// ----------------------------------------
-	// Initialize GLFW
-	// ----------------------------------------
+    if (!glfwInit())
+    {
+        std::cout << "Failed to initialize GLFW\n";
+        return -1;
+    }
 
-	glfwInit();
+    glfwWindowHint(
+        GLFW_CONTEXT_VERSION_MAJOR,
+        3
+    );
 
+    glfwWindowHint(
+        GLFW_CONTEXT_VERSION_MINOR,
+        3
+    );
 
+    glfwWindowHint(
+        GLFW_OPENGL_PROFILE,
+        GLFW_OPENGL_CORE_PROFILE
+    );
 
-	// Request OpenGL 3.3 Core profile.
-	//
-	// Core profile removes old fixed pipeline features
-	// and forces modern OpenGL usage.
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE,
-		GLFW_OPENGL_CORE_PROFILE);
 
+    // ========================================
+    // Create window
+    // ========================================
 
+    GLFWwindow* window =
+        glfwCreateWindow(
+            800,
+            800,
+            "TexForge",
+            nullptr,
+            nullptr
+        );
 
-	// Create the application window.
-	GLFWwindow* window = glfwCreateWindow(
-		800,
-		800,
-		"TexForge",
-		NULL,
-		NULL
-	);
 
+    if (window == nullptr)
+    {
+        std::cout
+            << "Failed to create GLFW window\n";
 
+        glfwTerminate();
 
-	if (window == NULL)
-	{
-		std::cout << "Failed to create GLFW window\n";
-		glfwTerminate();
-		return -1;
-	}
+        return -1;
+    }
 
 
+    glfwMakeContextCurrent(window);
 
-	// Makes this window the active OpenGL context.
-	glfwMakeContextCurrent(window);
 
+    // ========================================
+    // Initialize GLAD
+    // ========================================
 
+    if (!gladLoadGL())
+    {
+        std::cout
+            << "Failed to initialize GLAD\n";
 
-	// Load OpenGL functions.
-	//
-	// OpenGL functions are not directly available from the OS.
-	// GLAD loads the correct function pointers.
-	if (!gladLoadGL())
-	{
-		std::cout << "Failed to initialize GLAD\n";
-		return -1;
-	}
+        glfwDestroyWindow(window);
+        glfwTerminate();
 
+        return -1;
+    }
 
 
-	// Define the area OpenGL renders into.
-	glViewport(
-		0,
-		0,
-		800,
-		800
-	);
+    // ========================================
+    // OpenGL setup
+    // ========================================
 
+    glViewport(
+        0,
+        0,
+        800,
+        800
+    );
 
+    glEnable(GL_DEPTH_TEST);
 
-	// Enable depth buffering.
-	//
-	// Required for proper 3D rendering:
-	// closer objects hide objects behind them.
-	glEnable(GL_DEPTH_TEST);
 
+    // ========================================
+    // Initialize ImGui
+    // ========================================
 
+    IMGUI_CHECKVERSION();
 
+    ImGui::CreateContext();
 
+    ImGuiIO& io =
+        ImGui::GetIO();
 
-	// ----------------------------------------
-	// Initialize ImGui
-	// ----------------------------------------
+    ImGui::StyleColorsDark();
 
 
-	IMGUI_CHECKVERSION();
+    ImGui_ImplGlfw_InitForOpenGL(
+        window,
+        true
+    );
 
+    ImGui_ImplOpenGL3_Init(
+        "#version 330"
+    );
 
-	// Creates ImGui internal state.
-	ImGui::CreateContext();
 
+    // ========================================
+    // Load shader
+    // ========================================
 
+    Shader shaderProgram(
+        "vertex.vert",
+        "fragment.frag"
+    );
 
-	// Access ImGui settings.
-	ImGuiIO& io = ImGui::GetIO();
 
+    // ========================================
+    // Load model
+    // ========================================
 
+    ModelImporter importer;
 
-	// Default dark editor theme.
-	ImGui::StyleColorsDark();
+    Model model =
+        importer.Load(
+            "./testcube.obj"
+        );
 
 
+    // ========================================
+    // Camera
+    // ========================================
 
-	// Connect ImGui to GLFW.
-	// Handles keyboard, mouse and window input.
-	ImGui_ImplGlfw_InitForOpenGL(
-		window,
-		true
-	);
+    Camera camera(
+        800,
+        800,
+        glm::vec3(
+            0.0f,
+            0.0f,
+            2.0f
+        )
+    );
 
 
+    // ========================================
+    // Create blank paint texture
+    // ========================================
 
-	// Connect ImGui to OpenGL.
-	// This creates the GPU resources needed
-	// to draw the interface.
-	ImGui_ImplOpenGL3_Init(
-		"#version 330"
-	);
+    PaintTexture paintTexture(
+        2048,
+        2048
+    );
 
 
+    // ========================================
+    // Brush
+    // ========================================
 
+    Brush brush;
 
+    brush.color =
+        glm::vec4(
+            1.0f,
+            0.0f,
+            0.0f,
+            1.0f
+        );
 
-	// ----------------------------------------
-	// Create rendering objects
-	// ----------------------------------------
 
+    // ========================================
+    // File dialog
+    // ========================================
 
-	// Load vertex and fragment shaders.
-	//
-	// Vertex shader:
-	// transforms 3D coordinates
-	//
-	// Fragment shader:
-	// decides pixel colors
-	//
-	Shader shaderProgram(
-		"vertex.vert",
-		"fragment.frag"
-	);
+    ImGui::FileBrowser fileDialog;
 
-	ModelImporter importer;
+    fileDialog.SetTitle(
+        "Open Asset"
+    );
 
+    fileDialog.SetTypeFilters({
+        ".obj",
+        ".fbx",
+        ".gltf",
+        ".glb",
+        ".png",
+        ".jpg",
+        ".jpeg"
+        });
 
-	Model model =
-		importer.Load("./testcube.obj");
 
-	// Shader uniform used for testing scaling.
-	GLuint uniID =
-		glGetUniformLocation(
-			shaderProgram.ID,
-			"scale"
-		);
+    // ========================================
+    // Main loop
+    // ========================================
 
+    while (!glfwWindowShouldClose(window))
+    {
+        // ====================================
+        // Events
+        // ====================================
 
-	// Load texture into GPU memory.
-	Texture testImage(
-		"test_image.png",
-		GL_TEXTURE_2D,
-		GL_TEXTURE0,
-		GL_RGBA,
-		GL_UNSIGNED_BYTE
-	);
+        glfwPollEvents();
 
 
-	testImage.texUnit(
-		shaderProgram,
-		"tex0",
-		0
-	);
+        // ====================================
+        // Clear screen
+        // ====================================
 
-	// Camera controls the view matrix.
-	//
-	// Position:
-	// x = 0
-	// y = 0
-	// z = 2
-	//
-	Camera camera(
-		800,
-		800,
-		glm::vec3(0, 0, 2)
-	);
+        glClearColor(
+            0.07f,
+            0.13f,
+            0.17f,
+            1.0f
+        );
 
+        glClear(
+            GL_COLOR_BUFFER_BIT |
+            GL_DEPTH_BUFFER_BIT
+        );
 
-	PaintTexture paintTexture(
-		2048,
-		2048,
-		testImage.ID
-	);
 
-	Brush brush;
+        // ====================================
+        // Camera
+        // ====================================
 
-	brush.color =
-		glm::vec4(
-			1.0f,
-			0.0f,
-			0.0f,
-			1.0f
-		);
+        camera.Inputs(window);
 
 
+        // ====================================
+        // Activate shader
+        // ====================================
 
+        shaderProgram.Activate();
 
 
-	while (!glfwWindowShouldClose(window))
-	{
-		glfwPollEvents();
+        camera.Matrix(
+            shaderProgram,
+            "camMatrix"
+        );
 
 
-		glClearColor(
-			0.07f,
-			0.13f,
-			0.17f,
-			1.0f
-		);
+        // ====================================
+        // Bind paint texture
+        // ====================================
 
-		glClear(
-			GL_COLOR_BUFFER_BIT |
-			GL_DEPTH_BUFFER_BIT
-		);
+        glActiveTexture(
+            GL_TEXTURE0
+        );
 
+        glBindTexture(
+            GL_TEXTURE_2D,
+            paintTexture.ID
+        );
 
-		//----------------------------
-		// Camera
-		//----------------------------
 
-		camera.Inputs(window);
+        glUniform1i(
+            glGetUniformLocation(
+                shaderProgram.ID,
+                "tex0"
+            ),
+            0
+        );
 
-		camera.Matrix(
-			shaderProgram,
-			"camMatrix"
-		);
 
+        // ====================================
+        // Draw model
+        // ====================================
 
-		//----------------------------
-		// Render model
-		//----------------------------
+        model.Draw(
+            shaderProgram
+        );
 
-		shaderProgram.Activate();
 
-		model.Draw(shaderProgram);
+        // ====================================
+        // Get mouse position
+        // ====================================
 
+        double mouseX;
+        double mouseY;
 
+        glfwGetCursorPos(
+            window,
+            &mouseX,
+            &mouseY
+        );
 
-		//----------------------------
-		// Mouse position
-		//----------------------------
 
-		double mouseX;
-		double mouseY;
+        // ====================================
+        // Ray picking
+        // ====================================
 
-		glfwGetCursorPos(
-			window,
-			&mouseX,
-			&mouseY
-		);
+        Ray ray =
+            RayPicker::ScreenPointToRay(
+                mouseX,
+                mouseY,
+                800,
+                800,
+                camera
+            );
 
 
+        RaycastHit hit =
+            RayPicker::Raycast(
+                ray,
+                model
+            );
 
-		//----------------------------
-		// Picking / painting
-		//----------------------------
 
-		if (glfwGetMouseButton(
-			window,
-			GLFW_MOUSE_BUTTON_RIGHT
-		) == GLFW_PRESS)
-		{
+        // ====================================
+        // Painting
+        // ====================================
 
-			Ray ray =
-				RayPicker::ScreenPointToRay(
-					mouseX,
-					mouseY,
-					800,
-					800,
-					camera
-				);
+        if (
+            glfwGetMouseButton(
+                window,
+                GLFW_MOUSE_BUTTON_RIGHT
+            ) == GLFW_PRESS
+            &&
+            hit.hit
+            )
+        {
+            // Convert UV coordinates
+            // into texture coordinates.
 
+            int x =
+                static_cast<int>(
+                    hit.uv.x *
+                    paintTexture.width
+                    );
 
-			RaycastHit hit =
-				RayPicker::Raycast(
-					ray,
-					model
-				);
 
+            int y =
+                static_cast<int>(
+                    (1.0f - hit.uv.y) *
+                    paintTexture.height
+                    );
 
-			if (hit.hit)
-			{
-				std::cout
-					<< "Position: "
-					<< hit.position.x << ", "
-					<< hit.position.y << ", "
-					<< hit.position.z
-					<< "\n";
 
-				std::cout
-					<< "UV: "
-					<< hit.uv.x
-					<< ", "
-					<< hit.uv.y
-					<< "\n\n";
+            // Paint into CPU texture.
 
-				int x =
-					hit.uv.x *
-					paintTexture.width;
+            brush.Paint(
+                paintTexture,
+                x,
+                y
+            );
 
 
-				int y =
-					(1.0f - hit.uv.y) *
-					paintTexture.height;
+            // Upload modified pixels
+            // to the GPU.
 
+            paintTexture.Upload();
+        }
 
-				brush.Paint(
-					paintTexture,
-					x,
-					y
-				);
-			}
-		}
 
+        // ====================================
+        // Start ImGui frame
+        // ====================================
 
+        ImGui_ImplOpenGL3_NewFrame();
 
-		//----------------------------
-		// ImGui
-		//----------------------------
+        ImGui_ImplGlfw_NewFrame();
 
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+        ImGui::NewFrame();
 
 
-		ImGui::Begin("TexForge");
+        // ====================================
+        // Main TexForge window
+        // ====================================
 
+        ImGui::Begin(
+            "TexForge"
+        );
 
-		ImGui::Text(
-			"FPS: %.1f",
-			io.Framerate
-		);
 
+        ImGui::Text(
+            "FPS: %.1f",
+            io.Framerate
+        );
 
-		ImGui::SliderFloat(
-			"Brush Size",
-			&brush.radius,
-			1.0f,
-			100.0f
-		);
 
+        ImGui::Separator();
 
-		if (ImGui::Button("Save Project"))
-		{
-			std::cout << "Saving...\n";
-		}
 
+        // ====================================
+        // Brush settings
+        // ====================================
 
-		ImGui::End();
+        ImGui::Text(
+            "Brush"
+        );
 
 
+        ImGui::SliderFloat(
+            "Brush Size",
+            &brush.radius,
+            1.0f,
+            100.0f
+        );
 
-		//----------------------------
-		// Brush cursor
-		//----------------------------
 
-		ImDrawList* drawList =
-			ImGui::GetForegroundDrawList();
+        ImGui::ColorEdit4(
+            "Brush Color",
+            &brush.color.x
+        );
 
 
-		drawList->AddCircle(
-			ImVec2(mouseX, mouseY),
-			brush.radius,
-			IM_COL32(255, 255, 255, 255)
-		);
+        ImGui::Separator();
 
 
+        // ====================================
+        // Raycast information
+        // ====================================
 
-		ImGui::Render();
+        ImGui::Text(
+            "Selection"
+        );
 
-		ImGui_ImplOpenGL3_RenderDrawData(
-			ImGui::GetDrawData()
-		);
 
+        if (hit.hit)
+        {
+            ImGui::Text(
+                "Surface hit"
+            );
 
-		glfwSwapBuffers(window);
-	}
+            ImGui::Text(
+                "UV: %.3f, %.3f",
+                hit.uv.x,
+                hit.uv.y
+            );
 
+            ImGui::Text(
+                "Position: %.3f, %.3f, %.3f",
+                hit.position.x,
+                hit.position.y,
+                hit.position.z
+            );
+        }
+        else
+        {
+            ImGui::Text(
+                "No surface hit"
+            );
+        }
 
-	// ----------------------------------------
-	// Shutdown
-	// ----------------------------------------
-	ImGui_ImplOpenGL3_Shutdown();
 
-	ImGui_ImplGlfw_Shutdown();
+        ImGui::Separator();
 
-	ImGui::DestroyContext();
 
+        // ====================================
+        // File browser button
+        // ====================================
 
-	shaderProgram.Delete();
+        if (ImGui::Button(
+            "Open File"
+        ))
+        {
+            fileDialog.Open();
+        }
 
 
+        // ====================================
+        // Save button
+        // ====================================
 
-	glfwDestroyWindow(window);
+        if (ImGui::Button(
+            "Save Project"
+        ))
+        {
+            std::cout
+                << "Saving...\n";
+        }
 
-	glfwTerminate();
 
+        ImGui::End();
 
 
-	return 0;
+        // ====================================
+        // File dialog
+        // ====================================
+
+        fileDialog.Display();
+
+
+        // ====================================
+        // Check file selection
+        // ====================================
+
+        if (fileDialog.HasSelected())
+        {
+            std::cout
+                << "Selected filename: "
+                << fileDialog
+                .GetSelected()
+                .string()
+                << "\n";
+
+
+            // For now we just print the
+            // selected file.
+
+            // Later this can become:
+
+            // ImportModel(...)
+            // LoadTexture(...)
+            // OpenProject(...)
+
+
+            fileDialog.ClearSelected();
+        }
+
+
+        // ====================================
+        // Brush cursor
+        // ====================================
+
+        ImDrawList* drawList =
+            ImGui::GetForegroundDrawList();
+
+
+        drawList->AddCircle(
+            ImVec2(
+                static_cast<float>(mouseX),
+                static_cast<float>(mouseY)
+            ),
+            brush.radius,
+            IM_COL32(
+                255,
+                255,
+                255,
+                255
+            )
+        );
+
+
+        // ====================================
+        // Render ImGui
+        // ====================================
+
+        ImGui::Render();
+
+
+        ImGui_ImplOpenGL3_RenderDrawData(
+            ImGui::GetDrawData()
+        );
+
+
+        // ====================================
+        // Present frame
+        // ====================================
+
+        glfwSwapBuffers(
+            window
+        );
+    }
+
+
+    // ========================================
+    // Shutdown ImGui
+    // ========================================
+
+    ImGui_ImplOpenGL3_Shutdown();
+
+    ImGui_ImplGlfw_Shutdown();
+
+    ImGui::DestroyContext();
+
+
+    // ========================================
+    // Shutdown shader
+    // ========================================
+
+    shaderProgram.Delete();
+
+
+    // ========================================
+    // Shutdown GLFW
+    // ========================================
+
+    glfwDestroyWindow(
+        window
+    );
+
+    glfwTerminate();
+
+
+    return 0;
 }

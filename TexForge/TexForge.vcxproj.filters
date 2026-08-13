@@ -150,5 +150,8 @@
     <ClInclude Include="painting\FaceSelection.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="imfilebrowser.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

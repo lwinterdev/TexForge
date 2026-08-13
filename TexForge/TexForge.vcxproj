@@ -181,6 +181,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="EBO.h" />
     <ClInclude Include="engine\RayPicker.h" />
+    <ClInclude Include="imfilebrowser.h" />
     <ClInclude Include="painting\Brush.h" />
     <ClInclude Include="painting\FaceSelection.h" />
     <ClInclude Include="painting\PaintTexture.h" />
