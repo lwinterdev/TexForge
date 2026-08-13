@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 
 // Dear ImGui core
 #include <imgui.h>
@@ -161,10 +162,7 @@ int main()
 
     ModelImporter importer;
 
-    Model model =
-        importer.Load(
-            "./testcube.obj"
-        );
+    std::unique_ptr<Model> model = nullptr;
 
 
     // ========================================
@@ -211,13 +209,13 @@ int main()
     // File dialog
     // ========================================
 
-    ImGui::FileBrowser fileDialog;
+    ImGui::FileBrowser modelDialog;
 
-    fileDialog.SetTitle(
+    modelDialog.SetTitle(
         "Open Asset"
     );
 
-    fileDialog.SetTypeFilters({
+    modelDialog.SetTypeFilters({
         ".obj",
         ".fbx",
         ".gltf",
@@ -305,9 +303,10 @@ int main()
         // Draw model
         // ====================================
 
-        model.Draw(
-            shaderProgram
-        );
+        if (model)
+        {
+            model->Draw(shaderProgram);
+        }
 
 
         // ====================================
@@ -338,11 +337,16 @@ int main()
             );
 
 
-        RaycastHit hit =
-            RayPicker::Raycast(
-                ray,
-                model
-            );
+        RaycastHit hit;
+
+        if (model)
+        {
+            hit =
+                RayPicker::Raycast(
+                    ray,
+                    *model
+                );
+        }
 
 
         // ====================================
@@ -493,7 +497,7 @@ int main()
             "Open File"
         ))
         {
-            fileDialog.Open();
+            modelDialog.Open();
         }
 
 
@@ -517,34 +521,39 @@ int main()
         // File dialog
         // ====================================
 
-        fileDialog.Display();
+        modelDialog.Display();
 
 
         // ====================================
         // Check file selection
         // ====================================
 
-        if (fileDialog.HasSelected())
+        if (modelDialog.HasSelected())
         {
+            std::filesystem::path path =
+                modelDialog.GetSelected();
+
             std::cout
-                << "Selected filename: "
-                << fileDialog
-                .GetSelected()
-                .string()
+                << "Importing model: "
+                << path.string()
                 << "\n";
 
+            try
+            {
+                model = std::make_unique<Model>(
+                    importer.Load(path.string())
+                );
 
-            // For now we just print the
-            // selected file.
+                std::cout
+                    << "Model imported successfully.\n";
+            }
+            catch (...)
+            {
+                std::cout
+                    << "Failed to import model.\n";
+            }
 
-            // Later this can become:
-
-            // ImportModel(...)
-            // LoadTexture(...)
-            // OpenProject(...)
-
-
-            fileDialog.ClearSelected();
+            modelDialog.ClearSelected();
         }
 
 
