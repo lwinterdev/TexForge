@@ -87,6 +87,18 @@
     <ClCompile Include="painting\PaintLayer.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="app\Application.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="assets\ModelManager.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\Renderer.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="painting\PaintingSystem.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertex.vert" />
@@ -157,6 +169,21 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="painting\PaintLayer.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="app\Application.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="app\Header.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="assets\ModelManager.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\Renderer.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="painting\PaintingSystem.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

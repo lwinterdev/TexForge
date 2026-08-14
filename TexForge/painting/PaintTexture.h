@@ -1,74 +1,82 @@
 #pragma once
 
+#include <vector>
+
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
-#include <vector>
 
 class PaintTexture
 {
 public:
 
-    // Create a new blank texture.
-    // The texture starts completely black and opaque.
+    // ----------------------------------------
+    // Constructor / Destructor
+    // ----------------------------------------
+
     PaintTexture(
         int width,
         int height
     );
 
-    // Create a PaintTexture from an existing OpenGL texture.
-    // Useful while you're transitioning from your current setup.
-    PaintTexture(
-        int width,
-        int height,
-        GLuint existingTextureID
-    );
+    ~PaintTexture();
 
-    // Upload CPU pixels to the GPU texture.
-    void Upload();
 
-    // Set a single pixel.
+    // ----------------------------------------
+    // Painting
+    // ----------------------------------------
+
     void SetPixel(
         int x,
         int y,
         const glm::vec4& color
     );
 
-    // Get a single pixel.
-    glm::vec4 GetPixel(
+
+    void BlendPixel(
         int x,
-        int y
-    ) const;
+        int y,
+        const glm::vec4& color,
+        float opacity
+    );
 
-    // Access the CPU pixel buffer.
-    std::vector<unsigned char>& GetPixels();
 
-    const std::vector<unsigned char>& GetPixels() const;
+    // ----------------------------------------
+    // GPU
+    // ----------------------------------------
 
-    // OpenGL texture ID.
-    GLuint ID = 0;
+    void Upload();
 
-    // Texture dimensions.
-    int width = 0;
-    int height = 0;
+
+    // ----------------------------------------
+    // Access
+    // ----------------------------------------
+
+    int GetWidth() const;
+
+    int GetHeight() const;
+
+    GLuint GetID() const;
+
+
+    // ----------------------------------------
+    // Public texture data
+    //
+    // These are convenient for now while
+    // you're developing the painting system.
+    // ----------------------------------------
+
+    GLuint ID;
+
+    int width;
+    int height;
+
 
 private:
 
-    // CPU-side RGBA pixel data.
-    //
-    // Four bytes per pixel:
-    //
-    // R G B A
-    //
+    // ----------------------------------------
+    // CPU pixel data
+    // ----------------------------------------
+
     std::vector<unsigned char> pixels;
-
-    // Creates the OpenGL texture object.
-    void CreateGPUTexture();
-
-    // Initializes the CPU buffer to black.
-    void CreateBlackPixels();
-
-    // Prevent accidental copying of GPU resources.
-    PaintTexture(const PaintTexture&) = delete;
-    PaintTexture& operator=(const PaintTexture&) = delete;
 };
