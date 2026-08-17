@@ -25,8 +25,7 @@ Application::Application()
     : ui(
         brush,
         hit,
-        model,
-        modelDialog,
+        modelManager,
         mouseX,
         mouseY
     )
@@ -42,23 +41,6 @@ Application::Application()
             0.0f,
             1.0f
         );
-
-
-    // ----------------------------
-    // Configure file dialog
-    // ----------------------------
-
-    modelDialog.SetTitle(
-        "Open Asset"
-    );
-
-
-    modelDialog.SetTypeFilters({
-        ".obj",
-        ".fbx",
-        ".gltf",
-        ".glb"
-        });
 }
 
 
@@ -359,6 +341,10 @@ void Application::Update()
     hit = RaycastHit();
 
 
+    Model* model =
+        modelManager.GetModel();
+
+
     if (model && camera)
     {
         Ray ray =
@@ -390,7 +376,7 @@ void Application::Update()
     // File dialog
     // ----------------------------
 
-    ProcessModelDialog();
+    modelManager.ProcessDialog();
 }
 
 
@@ -400,17 +386,37 @@ void Application::Update()
 
 void Application::ProcessPainting()
 {
+    // ----------------------------
+    // Check model
+    // ----------------------------
+
+    Model* model =
+        modelManager.GetModel();
+
+
     if (!model)
         return;
 
+
+    // ----------------------------
+    // Check texture
+    // ----------------------------
 
     if (!paintTexture)
         return;
 
 
+    // ----------------------------
+    // Check raycast
+    // ----------------------------
+
     if (!hit.hit)
         return;
 
+
+    // ----------------------------
+    // Check mouse button
+    // ----------------------------
 
     if (
         glfwGetMouseButton(
@@ -539,95 +545,15 @@ void Application::Render()
     // Model
     // ----------------------------
 
+    Model* model =
+        modelManager.GetModel();
+
+
     if (model)
     {
         model->Draw(
             *shaderProgram
         );
-    }
-}
-
-
-// ========================================
-// Open model dialog
-// ========================================
-
-void Application::OpenModelDialog()
-{
-    modelDialog.Open();
-}
-
-
-// ========================================
-// Process model dialog
-// ========================================
-
-void Application::ProcessModelDialog()
-{
-    if (!modelDialog.HasSelected())
-        return;
-
-
-    std::filesystem::path path =
-        modelDialog.GetSelected();
-
-
-    std::cout
-        << "Importing model: "
-        << path.string()
-        << "\n";
-
-
-    LoadModel(path);
-
-
-    modelDialog.ClearSelected();
-}
-
-
-// ========================================
-// Load model
-// ========================================
-
-void Application::LoadModel(
-    const std::filesystem::path& path)
-{
-    try
-    {
-        // ----------------------------
-        // Import model
-        // ----------------------------
-
-        Model importedModel =
-            importer.Load(
-                path.string()
-            );
-
-
-        // ----------------------------
-        // Replace current model
-        // ----------------------------
-
-        model =
-            std::make_unique<Model>(
-                std::move(importedModel)
-            );
-
-
-        std::cout
-            << "Model imported successfully.\n";
-    }
-    catch (const std::exception& e)
-    {
-        std::cout
-            << "Failed to import model:\n"
-            << e.what()
-            << "\n";
-    }
-    catch (...)
-    {
-        std::cout
-            << "Failed to import model.\n";
     }
 }
 

@@ -32,6 +32,8 @@ public:
 
     void ProcessDialog();
 
+    void Render();
+
 
     // ----------------------------------------
     // Current model

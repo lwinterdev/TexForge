@@ -26,6 +26,11 @@ ModelManager::ModelManager()
         });
 }
 
+void ModelManager::Render()
+{
+    modelDialog.Display();
+}
+
 
 // ========================================
 // Open dialog

@@ -21,7 +21,7 @@
 #include "../painting/PaintTexture.h"
 #include "../engine/RayPicker.h"
 #include "../assets/ModelManager.h"
-#include "UIManager.h"
+#include "../UiManager.h"
 
 
 // ========================================

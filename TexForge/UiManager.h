@@ -1,80 +1,87 @@
 #pragma once
 
-#include <imgui.h>
+// ========================================
+// GLFW
+// ========================================
 
-#include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 
-// Forward declarations
-class Model;
-class Brush;
-class FileDialog;
 
-struct RaycastHit;
+// ========================================
+// Project
+// ========================================
 
+#include "painting/Brush.h"
+#include "engine/RayPicker.h"
+
+
+// Forward declaration
+class ModelManager;
+
+
+// ========================================
+// UI Manager
+// ========================================
 
 class UIManager
 {
 public:
 
-    // ========================================
+    // ====================================
     // Constructor
-    // ========================================
+    // ====================================
 
     UIManager(
         Brush& brush,
         RaycastHit& hit,
-        Model*& model,
-        FileDialog& modelDialog,
+        ModelManager& modelManager,
         double& mouseX,
         double& mouseY
     );
 
 
-    // ========================================
+    // ====================================
     // Initialization
-    // ========================================
+    // ====================================
 
     bool Initialize(
         GLFWwindow* window
     );
 
 
-    // ========================================
+    // ====================================
     // Rendering
-    // ========================================
+    // ====================================
 
     void Render();
 
 
-    // ========================================
+    // ====================================
     // Shutdown
-    // ========================================
+    // ====================================
 
     void Shutdown();
 
 
 private:
 
-    // ========================================
-    // UI data
-    // ========================================
+    // ====================================
+    // Window
+    // ====================================
+
+    GLFWwindow* window = nullptr;
+
+
+    // ====================================
+    // References to application data
+    // ====================================
 
     Brush& brush;
 
     RaycastHit& hit;
 
-    Model*& model;
-
-    FileDialog& modelDialog;
+    ModelManager& modelManager;
 
     double& mouseX;
     double& mouseY;
-
-
-    // ========================================
-    // Window
-    // ========================================
-
-    GLFWwindow* window = nullptr;
 };

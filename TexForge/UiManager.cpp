@@ -4,7 +4,9 @@
 #include "assets/Model.h"
 #include "FileDialog.h"
 #include "engine/RayPicker.h"
+#include "assets/ModelManager.h"
 
+#include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
@@ -18,15 +20,13 @@
 UIManager::UIManager(
     Brush& brush,
     RaycastHit& hit,
-    Model*& model,
-    FileDialog& modelDialog,
+    ModelManager& modelManager,
     double& mouseX,
     double& mouseY
 )
     : brush(brush),
     hit(hit),
-    model(model),
-    modelDialog(modelDialog),
+    modelManager(modelManager),
     mouseX(mouseX),
     mouseY(mouseY)
 {
@@ -226,11 +226,11 @@ void UIManager::Render()
         "Open Model"
     ))
     {
-        modelDialog.Open();
+        modelManager.OpenDialog();
     }
 
 
-    if (model)
+    if (modelManager.GetModel())
     {
         ImGui::Text(
             "Model loaded"
@@ -261,14 +261,6 @@ void UIManager::Render()
 
 
     ImGui::End();
-
-
-    // ====================================
-    // File dialog
-    // ====================================
-
-    modelDialog.Display();
-
 
     // ====================================
     // Brush cursor
