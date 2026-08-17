@@ -4,16 +4,6 @@
 
 
 // ========================================
-// ImGui
-// ========================================
-
-#include <imgui.h>
-
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
-
-
-// ========================================
 // OpenGL
 // ========================================
 
@@ -32,6 +22,14 @@
 // ========================================
 
 Application::Application()
+    : ui(
+        brush,
+        hit,
+        model,
+        modelDialog,
+        mouseX,
+        mouseY
+    )
 {
     // ----------------------------
     // Default brush
@@ -112,10 +110,10 @@ bool Application::Initialize()
 
 
     // ----------------------------
-    // ImGui
+    // UI
     // ----------------------------
 
-    if (!InitializeImGui())
+    if (!ui.Initialize(window))
         return false;
 
 
@@ -270,72 +268,6 @@ bool Application::InitializeOpenGL()
 
 
 // ========================================
-// ImGui initialization
-// ========================================
-
-bool Application::InitializeImGui()
-{
-    IMGUI_CHECKVERSION();
-
-
-    // ----------------------------
-    // Create ImGui context
-    // ----------------------------
-
-    ImGui::CreateContext();
-
-
-    // ----------------------------
-    // Get IO
-    // ----------------------------
-
-    ImGuiIO& io =
-        ImGui::GetIO();
-
-    (void)io;
-
-
-    // ----------------------------
-    // Theme
-    // ----------------------------
-
-    ImGui::StyleColorsDark();
-
-
-    // ----------------------------
-    // GLFW backend
-    // ----------------------------
-
-    if (!ImGui_ImplGlfw_InitForOpenGL(
-        window,
-        true))
-    {
-        std::cout
-            << "Failed to initialize ImGui GLFW backend\n";
-
-        return false;
-    }
-
-
-    // ----------------------------
-    // OpenGL backend
-    // ----------------------------
-
-    if (!ImGui_ImplOpenGL3_Init(
-        "#version 330"))
-    {
-        std::cout
-            << "Failed to initialize ImGui OpenGL backend\n";
-
-        return false;
-    }
-
-
-    return true;
-}
-
-
-// ========================================
 // Run
 // ========================================
 
@@ -378,7 +310,7 @@ void Application::Run()
         // UI
         // ----------------------------
 
-        RenderUI();
+        ui.Render();
 
 
         // ----------------------------
@@ -617,204 +549,6 @@ void Application::Render()
 
 
 // ========================================
-// UI
-// ========================================
-
-void Application::RenderUI()
-{
-    // ----------------------------
-    // Start ImGui frame
-    // ----------------------------
-
-    ImGui_ImplOpenGL3_NewFrame();
-
-    ImGui_ImplGlfw_NewFrame();
-
-    ImGui::NewFrame();
-
-
-    // ====================================
-    // Main window
-    // ====================================
-
-    ImGui::Begin(
-        "TexForge"
-    );
-
-
-    // ----------------------------
-    // FPS
-    // ----------------------------
-
-    ImGuiIO& io =
-        ImGui::GetIO();
-
-
-    ImGui::Text(
-        "FPS: %.1f",
-        io.Framerate
-    );
-
-
-    ImGui::Separator();
-
-
-    // ====================================
-    // Brush
-    // ====================================
-
-    ImGui::Text(
-        "Brush"
-    );
-
-
-    ImGui::SliderFloat(
-        "Brush Size",
-        &brush.radius,
-        1.0f,
-        100.0f
-    );
-
-
-    ImGui::ColorEdit4(
-        "Brush Color",
-        &brush.color.x
-    );
-
-
-    ImGui::Separator();
-
-
-    // ====================================
-    // Selection
-    // ====================================
-
-    ImGui::Text(
-        "Selection"
-    );
-
-
-    if (hit.hit)
-    {
-        ImGui::Text(
-            "Surface hit"
-        );
-
-
-        ImGui::Text(
-            "UV: %.3f, %.3f",
-            hit.uv.x,
-            hit.uv.y
-        );
-
-
-        ImGui::Text(
-            "Position: %.3f, %.3f, %.3f",
-            hit.position.x,
-            hit.position.y,
-            hit.position.z
-        );
-    }
-    else
-    {
-        ImGui::Text(
-            "No surface hit"
-        );
-    }
-
-
-    ImGui::Separator();
-
-
-    // ====================================
-    // Model
-    // ====================================
-
-    if (ImGui::Button(
-        "Open Model"
-    ))
-    {
-        OpenModelDialog();
-    }
-
-
-    if (model)
-    {
-        ImGui::Text(
-            "Model loaded"
-        );
-    }
-    else
-    {
-        ImGui::Text(
-            "No model loaded"
-        );
-    }
-
-
-    ImGui::Separator();
-
-
-    // ====================================
-    // Save
-    // ====================================
-
-    if (ImGui::Button(
-        "Save Project"
-    ))
-    {
-        std::cout
-            << "Saving...\n";
-    }
-
-
-    ImGui::End();
-
-
-    // ====================================
-    // File dialog
-    // ====================================
-
-    modelDialog.Display();
-
-
-    // ====================================
-    // Brush cursor
-    // ====================================
-
-    ImDrawList* drawList =
-        ImGui::GetForegroundDrawList();
-
-
-    drawList->AddCircle(
-        ImVec2(
-            static_cast<float>(mouseX),
-            static_cast<float>(mouseY)
-        ),
-        brush.radius,
-        IM_COL32(
-            255,
-            255,
-            255,
-            255
-        )
-    );
-
-
-    // ====================================
-    // Render ImGui
-    // ====================================
-
-    ImGui::Render();
-
-
-    ImGui_ImplOpenGL3_RenderDrawData(
-        ImGui::GetDrawData()
-    );
-}
-
-
-// ========================================
 // Open model dialog
 // ========================================
 
@@ -905,22 +639,18 @@ void Application::LoadModel(
 void Application::Shutdown()
 {
     // Prevent double shutdown
-    // if Application is destroyed more
-    // than once.
+    // if Application is destroyed
+    // more than once.
 
     if (!window)
         return;
 
 
     // ----------------------------
-    // ImGui
+    // UI
     // ----------------------------
 
-    ImGui_ImplOpenGL3_Shutdown();
-
-    ImGui_ImplGlfw_Shutdown();
-
-    ImGui::DestroyContext();
+    ui.Shutdown();
 
 
     // ----------------------------
