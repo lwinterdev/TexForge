@@ -23,6 +23,7 @@
 #include "../assets/ModelManager.h"
 #include "../UiManager.h"
 #include "../Input/InputManager.h"
+#include "../renderer/Renderer.h"
 
 
 // ========================================
@@ -141,4 +142,6 @@ private:
     // ====================================
 
     UIManager ui;
+
+	Renderer renderer;
 };
