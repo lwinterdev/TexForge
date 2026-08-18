@@ -16,7 +16,7 @@
 
 #include <glm/glm.hpp>
 
-
+InputManager input;
 // ========================================
 // Constructor
 // ========================================
@@ -26,8 +26,7 @@ Application::Application()
         brush,
         hit,
         modelManager,
-        mouseX,
-        mouseY
+        input
     )
 {
     // ----------------------------
@@ -327,11 +326,7 @@ void Application::Update()
     // Mouse position
     // ----------------------------
 
-    glfwGetCursorPos(
-        window,
-        &mouseX,
-        &mouseY
-    );
+    input.UpdateMousePosition(window);
 
 
     // ----------------------------
@@ -349,8 +344,8 @@ void Application::Update()
     {
         Ray ray =
             RayPicker::ScreenPointToRay(
-                mouseX,
-                mouseY,
+                input.GetMouseX(),
+                input.GetMouseY(),
                 windowWidth,
                 windowHeight,
                 *camera
@@ -418,12 +413,10 @@ void Application::ProcessPainting()
     // Check mouse button
     // ----------------------------
 
-    if (
-        glfwGetMouseButton(
-            window,
-            GLFW_MOUSE_BUTTON_RIGHT
-        ) != GLFW_PRESS
-        )
+    if (!input.IsMouseButtonPressed(
+        window,
+        GLFW_MOUSE_BUTTON_RIGHT
+    ))
     {
         return;
     }

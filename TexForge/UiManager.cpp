@@ -6,6 +6,7 @@
 #include "engine/RayPicker.h"
 #include "assets/ModelManager.h"
 
+
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -21,14 +22,12 @@ UIManager::UIManager(
     Brush& brush,
     RaycastHit& hit,
     ModelManager& modelManager,
-    double& mouseX,
-    double& mouseY
+	InputManager& input
 )
     : brush(brush),
     hit(hit),
     modelManager(modelManager),
-    mouseX(mouseX),
-    mouseY(mouseY)
+	input(input)
 {
 }
 
@@ -272,8 +271,8 @@ void UIManager::Render()
 
     drawList->AddCircle(
         ImVec2(
-            static_cast<float>(mouseX),
-            static_cast<float>(mouseY)
+            static_cast<float>(input.GetMouseX()),
+            static_cast<float>(input.GetMouseY())
         ),
         brush.radius,
         IM_COL32(

@@ -102,6 +102,12 @@
     <ClCompile Include="UiManager.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="FileDialog.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\InputManager.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertex.vert" />
@@ -177,9 +183,6 @@
     <ClInclude Include="app\Application.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="app\Header.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="assets\ModelManager.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
@@ -190,6 +193,12 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="UiManager.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="FileDialog.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\InputManager.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

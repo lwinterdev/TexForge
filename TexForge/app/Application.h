@@ -22,6 +22,7 @@
 #include "../engine/RayPicker.h"
 #include "../assets/ModelManager.h"
 #include "../UiManager.h"
+#include "../Input/InputManager.h"
 
 
 // ========================================
@@ -97,9 +98,7 @@ private:
     // Input
     // ====================================
 
-    double mouseX = 0.0;
-    double mouseY = 0.0;
-
+	InputManager input;
 
     // ====================================
     // Rendering

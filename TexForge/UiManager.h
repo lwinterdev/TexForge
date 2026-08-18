@@ -13,7 +13,7 @@
 
 #include "painting/Brush.h"
 #include "engine/RayPicker.h"
-
+#include "Input/InputManager.h"
 
 // Forward declaration
 class ModelManager;
@@ -35,8 +35,7 @@ public:
         Brush& brush,
         RaycastHit& hit,
         ModelManager& modelManager,
-        double& mouseX,
-        double& mouseY
+        InputManager& inputManager
     );
 
 
@@ -82,6 +81,7 @@ private:
 
     ModelManager& modelManager;
 
-    double& mouseX;
-    double& mouseY;
+	InputManager& input;
+
+
 };

@@ -156,6 +156,7 @@
     <ClCompile Include="EBO.cpp" />
     <ClCompile Include="engine\Raypicker.cpp" />
     <ClCompile Include="FileDialog.cpp" />
+    <ClCompile Include="Input\InputManager.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="painting\Brush.cpp" />
     <ClCompile Include="painting\FaceSelection.cpp" />
@@ -192,6 +193,7 @@
     <ClInclude Include="engine\RayPicker.h" />
     <ClInclude Include="FileDialog.h" />
     <ClInclude Include="imfilebrowser.h" />
+    <ClInclude Include="Input\InputManager.h" />
     <ClInclude Include="painting\Brush.h" />
     <ClInclude Include="painting\FaceSelection.h" />
     <ClInclude Include="painting\PaintingSystem.h" />
