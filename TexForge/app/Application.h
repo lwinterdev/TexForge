@@ -24,6 +24,7 @@
 #include "../UiManager.h"
 #include "../Input/InputManager.h"
 #include "../renderer/Renderer.h"
+#include "../painting/PaintingSystem.h"
 
 
 // ========================================
@@ -101,6 +102,8 @@ private:
 
 	InputManager input;
 
+    PaintingSystem paintingSystem;
+
     // ====================================
     // Rendering
     // ====================================
@@ -121,7 +124,6 @@ private:
     // ====================================
 
     Brush brush;
-
 
     // ====================================
     // Raycasting
