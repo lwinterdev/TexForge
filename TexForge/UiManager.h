@@ -13,6 +13,7 @@
 
 #include "painting/Brush.h"
 #include "engine/RayPicker.h"
+#include "UiManager.h"
 #include "Input/InputManager.h"
 
 // Forward declaration

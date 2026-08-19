@@ -39,6 +39,8 @@ void ModelManager::Render()
 void ModelManager::OpenDialog()
 {
     modelDialog.Open();
+    std::cout
+        << "opening model dialog...\n";
 }
 
 
