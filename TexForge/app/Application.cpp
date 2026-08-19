@@ -16,13 +16,24 @@
 
 #include <glm/glm.hpp>
 
+
+// ========================================
+// Global input
+// ========================================
+
 InputManager input;
+
+
 // ========================================
 // Constructor
 // ========================================
 
 Application::Application()
-    : ui(
+    : paintingSystem(
+        brush,
+        input
+    ),
+    ui(
         brush,
         hit,
         modelManager,
@@ -104,6 +115,7 @@ bool Application::Initialize()
 
     if (!renderer.Initialize())
         return false;
+
 
     // ----------------------------
     // Camera
@@ -360,7 +372,11 @@ void Application::Update()
     // Painting
     // ----------------------------
 
-    ProcessPainting();
+    paintingSystem.Update(
+        window,
+        hit,
+        paintTexture.get()
+    );
 
 
     // ----------------------------
@@ -372,90 +388,6 @@ void Application::Update()
 
 
 // ========================================
-// Painting
-// ========================================
-
-void Application::ProcessPainting()
-{
-    // ----------------------------
-    // Check model
-    // ----------------------------
-
-    Model* model =
-        modelManager.GetModel();
-
-
-    if (!model)
-        return;
-
-
-    // ----------------------------
-    // Check texture
-    // ----------------------------
-
-    if (!paintTexture)
-        return;
-
-
-    // ----------------------------
-    // Check raycast
-    // ----------------------------
-
-    if (!hit.hit)
-        return;
-
-
-    // ----------------------------
-    // Check mouse button
-    // ----------------------------
-
-    if (!input.IsMouseButtonPressed(
-        window,
-        GLFW_MOUSE_BUTTON_RIGHT
-    ))
-    {
-        return;
-    }
-
-
-    // ----------------------------
-    // UV -> texture coordinates
-    // ----------------------------
-
-    int x =
-        static_cast<int>(
-            hit.uv.x *
-            paintTexture->width
-            );
-
-
-    int y =
-        static_cast<int>(
-            (1.0f - hit.uv.y) *
-            paintTexture->height
-            );
-
-
-    // ----------------------------
-    // Paint
-    // ----------------------------
-
-    brush.Paint(
-        *paintTexture,
-        x,
-        y
-    );
-
-
-    // ----------------------------
-    // Upload to GPU
-    // ----------------------------
-
-    paintTexture->Upload();
-}
-
-
-// ========================================
 // Rendering
 // ========================================
 
@@ -463,6 +395,7 @@ void Application::Render()
 {
     Model* model =
         modelManager.GetModel();
+
 
     renderer.Render(
         camera.get(),
@@ -501,6 +434,7 @@ void Application::Shutdown()
     // ----------------------------
 
     paintTexture.reset();
+
 
     // ----------------------------
     // Renderer
