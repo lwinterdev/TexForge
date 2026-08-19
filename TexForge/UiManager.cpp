@@ -258,6 +258,8 @@ void UIManager::Render()
             << "Saving...\n";
     }
 
+    // Draw model dialog
+    modelManager.Render();
 
     ImGui::End();
 
